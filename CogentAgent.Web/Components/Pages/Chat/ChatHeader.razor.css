@@ -1,6 +1,8 @@
 .chat-header-container {
-    top: 0; 
-    padding: 1.5rem; 
+    top: 0;
+    background: linear-gradient(to bottom, #1a1a2e, #0f0f1a);
+    padding: 2rem 0;
+    border-bottom: 1px solid #2c2c3e;
 }
 
 .chat-header-controls {

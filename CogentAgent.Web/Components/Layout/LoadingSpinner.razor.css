@@ -1,24 +1,24 @@
-﻿/* Used under CC0 license */
-
-.lds-ellipsis {
-    color: #666;
-    animation: fade-in 1s;
+﻿.lds-ellipsis {
+    color: #3acfd5;
+    animation: fade-in 1s ease-in-out;
 }
 
 @keyframes fade-in {
     0% {
         opacity: 0;
+        transform: scale(0.9);
     }
 
     100% {
         opacity: 1;
+        transform: scale(1);
     }
 }
 
-    .lds-ellipsis,
-    .lds-ellipsis div {
-        box-sizing: border-box;
-    }
+.lds-ellipsis,
+.lds-ellipsis div {
+    box-sizing: border-box;
+}
 
 .lds-ellipsis {
     margin: auto;
@@ -35,7 +35,7 @@
         height: 10px;
         border-radius: 50%;
         background: currentColor;
-        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
         .lds-ellipsis div:nth-child(1) {
