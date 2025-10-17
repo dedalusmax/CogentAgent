@@ -1,25 +1,46 @@
 ﻿@page "/"
+
 @using System.ComponentModel
+@using CogentAgent.Web.Components.Pages.Game
+
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject SemanticSearch Search
+
 @implements IDisposable
 
-<PageTitle>Chat</PageTitle>
+<PageTitle>Cogent Chat</PageTitle>
 
-<ChatHeader OnNewChat="@ResetConversationAsync" />
+<div class="chat-layout">
+    <!-- Left: Player Chat -->
+    <div class="chat-pane">
+        <ChatHeader OnNewChat="@ResetConversationAsync" />
 
-<ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
-    <NoMessagesContent>
-    </NoMessagesContent>
-</ChatMessageList>
+        <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
+            <NoMessagesContent>
+            </NoMessagesContent>
+        </ChatMessageList>
 
-<div class="chat-container">
-    <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
-    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+        <div class="chat-container">
+            <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
+            <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+        </div>
+    </div>
+
+    <!-- Right: DM Chat (conditionally shown) -->
+    <div class="chat-pane right-pane @(showRightPane ? "visible" : "hidden")">
+        <Game></Game>
+    </div>
 </div>
 
+<button class="toggle-pane-button" @onclick="ToggleRightPane">
+    @((showRightPane ? "Hide" : "Show") + " DM View")
+</button>
+
 @code {
+    private bool showRightPane = false;
+    private void ToggleRightPane() => showRightPane = !showRightPane;
+
     private const string SystemPrompt = @"
         You are an AI assistant designed to help players learning to play Cogent - a pen & paper role-playing game,
         by providing information based on a collection of documents, and their homepage at https://cogentroleplay.com/.
@@ -34,7 +55,12 @@
         Always include the citation in your response if there are results. 
 
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-        Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.        ";
+        Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.        
+
+        If the player desires to play the game, create a special tag: 
+        <game playerName='string'></game>
+        But not before asking the user about her/his name!
+    ";
 
     private int statefulMessageCount;
     private readonly ChatOptions chatOptions = new();

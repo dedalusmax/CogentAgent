@@ -1,3 +1,56 @@
+.chat-layout {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.chat-pane {
+    flex: 1;
+    padding: 1rem;
+    transition: all 0.4s ease;
+    overflow-y: auto;
+    background-color: #0f0f1a;
+    border-right: 1px solid #2c2c3e;
+}
+
+.right-pane {
+    border-left: 1px solid #2c2c3e;
+    background-color: #1a1a2e;
+}
+
+    .right-pane.hidden {
+        width: 0;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(100%);
+    }
+
+    .right-pane.visible {
+        width: 50%;
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+.toggle-pane-button {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #3a4ed5;
+    color: #fff;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    z-index: 1000;
+    transition: background-color 0.2s ease;
+}
+
+    .toggle-pane-button:hover {
+        background-color: #3acfd5;
+    }
+
+
 .chat-container {
     position: sticky;
     bottom: 0;

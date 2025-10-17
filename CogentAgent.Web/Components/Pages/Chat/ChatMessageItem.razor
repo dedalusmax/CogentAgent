@@ -1,6 +1,7 @@
 @using System.Runtime.CompilerServices
 @using System.Text.RegularExpressions
 @using System.Linq
+@using CogentAgent.Web.Components.Pages.Game
 
 @if (Message.Role == ChatRole.User)
 {
@@ -31,6 +32,12 @@ else if (Message.Role == ChatRole.Assistant)
                         <ChatCitation File="@citation.File" PageNumber="@citation.Page" Quote="@citation.Quote" />
                     }
                 </div>
+                @if (game is not null)
+                {
+                    <div class="assistant-message-game">
+                        <PlayGame PlayerName="@game.Item2" />
+                    </div>
+                }
             </div>
         }
         else if (content is FunctionCallContent { Name: "Search" } fcc && fcc.Arguments?.TryGetValue("searchPhrase", out var searchPhrase) is true)
@@ -56,15 +63,21 @@ else if (Message.Role == ChatRole.Assistant)
 
 @code {
     private static readonly ConditionalWeakTable<ChatMessage, ChatMessageItem> SubscribersLookup = new();
+
     private static readonly Regex CitationRegex = new(@"<citation filename='(?<file>[^']*)' page_number='(?<page>\d*)'>(?<quote>.*?)</citation>", RegexOptions.NonBacktracking);
+    private static readonly Regex GameTagRegex = new(@"<game playerName='(?<player>[a-zA-Z0-9]+)'\s*>", RegexOptions.NonBacktracking);
 
     private List<(string File, int? Page, string Quote)>? citations;
+    private Tuple<bool, string>? game;
 
     [Parameter, EditorRequired]
     public required ChatMessage Message { get; set; }
 
     [Parameter]
     public bool InProgress { get; set;}
+
+    [Parameter]
+    public EventCallback<string> OnGameStarted { get; set; }
 
     protected override void OnInitialized()
     {
@@ -73,6 +86,7 @@ else if (Message.Role == ChatRole.Assistant)
         if (!InProgress && Message.Role == ChatRole.Assistant && Message.Text is { Length: > 0 } text)
         {
             ParseCitations(text);
+            ParsePlayGame(text);
         }
     }
 
@@ -90,5 +104,17 @@ else if (Message.Role == ChatRole.Assistant)
         citations = matches.Any()
             ? matches.Select(m => (m.Groups["file"].Value, int.TryParse(m.Groups["page"].Value, out var page) ? page : (int?)null, m.Groups["quote"].Value)).ToList()
             : null;
+    }
+
+    private void ParsePlayGame(string text)
+    {
+        var matches = GameTagRegex.Matches(text);
+
+        game = matches.Select(m =>
+            {
+                var playerName = m.Groups["player"].Value;
+                return Tuple.Create(true, playerName);
+            })
+            .FirstOrDefault();
     }
 }

@@ -1,0 +1,17 @@
+﻿<button class="btn-play-game" @onclick="LaunchGame">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="play-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v18l15-9L5 3z" />
+    </svg>
+    Play Game as @PlayerName
+</button>
+
+@code {
+    [Parameter] public string PlayerName { get; set; } = "Pero";
+
+    private void LaunchGame()
+    {
+        NavigationManager.NavigateTo($"/game?playerName={Uri.EscapeDataString(PlayerName)}");
+    }
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+}
