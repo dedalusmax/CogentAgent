@@ -4,7 +4,7 @@
     <chat-messages class="page-width message-list" in-progress="@(InProgressMessage is not null)">
         @foreach (var message in Messages)
         {
-            <ChatMessageItem @key="@message" Message="@message" />
+            <ChatMessageItem @key="@message" Message="@message" OnPlayGameRequested="@OnPlayGameRequested" />
         }
 
         @if (InProgressMessage is not null)
@@ -28,6 +28,9 @@
 
     [Parameter]
     public RenderFragment? NoMessagesContent { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnPlayGameRequested { get; set; }
 
     private bool IsEmpty => !Messages.Any(m => (m.Role == ChatRole.User || m.Role == ChatRole.Assistant) && !string.IsNullOrEmpty(m.Text));
 

@@ -2,6 +2,7 @@
 
 @using System.ComponentModel
 @using CogentAgent.Web.Components.Pages.Game
+@using CogentAgent.Web.Models
 
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
@@ -16,7 +17,7 @@
     <div class="chat-pane">
         <ChatHeader OnNewChat="@ResetConversationAsync" />
 
-        <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
+        <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage" OnPlayGameRequested="@HandlePlayGame">
             <NoMessagesContent>
             </NoMessagesContent>
         </ChatMessageList>
@@ -27,19 +28,29 @@
         </div>
     </div>
 
-    <!-- Right: DM Chat (conditionally shown) -->
+    <!-- Right: Game Chat (conditionally shown) -->
     <div class="chat-pane right-pane @(showRightPane ? "visible" : "hidden")">
-        <Game></Game>
+        @if (!string.IsNullOrEmpty(gameCreator))
+        {
+            <GameChat GameCreator="@gameCreator"></GameChat>
+        }
     </div>
 </div>
 
 <button class="toggle-pane-button" @onclick="ToggleRightPane">
-    @((showRightPane ? "Hide" : "Show") + " DM View")
+    @((showRightPane ? "Hide" : "Show") + " Game View")
 </button>
 
 @code {
     private bool showRightPane = false;
     private void ToggleRightPane() => showRightPane = !showRightPane;
+    private string gameCreator = string.Empty;
+
+    private void HandlePlayGame(string playerName)
+    {
+        gameCreator = playerName;
+        ToggleRightPane();
+    }
 
     private const string SystemPrompt = @"
         You are an AI assistant designed to help players learning to play Cogent - a pen & paper role-playing game,
@@ -59,7 +70,6 @@
 
         If the player desires to play the game, create a special tag: 
         <game playerName='string'></game>
-        But not before asking the user about her/his name!
     ";
 
     private int statefulMessageCount;

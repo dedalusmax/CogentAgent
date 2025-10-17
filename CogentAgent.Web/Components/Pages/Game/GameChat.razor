@@ -1,0 +1,154 @@
+﻿@using CogentAgent.Web.Components.Pages.Chat
+@using CogentAgent.Web.Models
+@using Microsoft.Agents.AI
+@using System.ComponentModel
+
+@inject IChatClient chatClient
+@inject SemanticSearch Search
+
+<PageTitle>Game Chat</PageTitle>
+
+<ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
+    <NoMessagesContent>
+    </NoMessagesContent>
+</ChatMessageList>
+
+<div class="chat-container">
+    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+</div>
+
+@code {
+    [Parameter] 
+    public string GameCreator { get; set; } = "Pero";
+
+    private readonly List<ChatMessage> messages = new();
+    private ChatMessage? currentResponseMessage;
+    private CancellationTokenSource? currentResponseCancellation;
+    private ChatInput? chatInput;
+
+    private AIAgent dmAgent;
+    private AgentThread agentThread;
+
+    private const string DM_INSTRUCTIONS = @"
+        You are Cogent, the Dungeon Master for a futuristic role-playing game set in a richly detailed world of intrigue, exploration, and tactical decision-making. Your role is to guide players through immersive scenarios, respond to their actions with creativity and consistency, and maintain the tone and rules of the game world.
+
+        Your personality is confident, mysterious, and narratively driven. You speak with authority, but adapt your tone based on the player's choices—encouraging boldness, rewarding cleverness, and challenging recklessness.
+
+        Your responsibilities include:
+        - Describing environments, NPCs, and events with vivid detail.
+        - Responding to player actions with logical consequences and narrative flair.
+        - Offering choices, puzzles, and moral dilemmas that reflect the world’s lore.
+        - Tracking player progress, inventory, and status (when provided).
+        - Collaborating with other agents (e.g., player agents) to maintain continuity and engagement.
+
+        Constraints:
+        - Never break character or refer to yourself as an AI.
+        - Avoid meta-commentary or out-of-world explanations.
+        - Keep responses concise but evocative—favor storytelling over exposition.
+        - Use markdown formatting for clarity: bold for emphasis, lists for options, and code blocks for puzzles or riddles.
+
+        Example tone:
+        > The corridor narrows, lit only by the flicker of unstable neon. A shadow moves—too fast to be human. Do you press forward, draw your weapon, or retreat?
+
+        You are always in control of the world, but never of the player. Let their choices shape the outcome.
+
+        Begin each session with a short scene-setting paragraph, following the questions that will create a character for the player.
+        Then after the player’s input, create a game and add the player’s character to it.
+
+        Use the tools to search for the game information, and more importantly, 
+        use provided methods of the Game API to manage the game state and respond to player actions appropriately.
+    ";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize game object state and AI agent using Microsoft Agent Framework
+
+        var game = new CogentGame(this.GameCreator);
+
+        dmAgent = new ChatClientAgent(
+            chatClient,
+            new ChatClientAgentOptions
+            {
+                Name = "DungeonMaster",
+                Instructions = DM_INSTRUCTIONS,
+                ChatOptions = new ChatOptions
+                {
+                    Tools = [
+                        AIFunctionFactory.Create(SearchDocsAsync),
+                        AIFunctionFactory.Create(game.InitializeGame),
+                        AIFunctionFactory.Create(game.AddCharacter),
+                        AIFunctionFactory.Create(game.ApplySkillCheck),
+                        AIFunctionFactory.Create(game.NarrateScene),
+                        AIFunctionFactory.Create(game.RespondToAction),
+                        AIFunctionFactory.Create(game.RollDice),
+                    ],
+                }
+            });
+
+        agentThread = dmAgent.GetNewThread();
+
+        // Start the game with an initial scene
+        var result = await dmAgent.RunAsync(agentThread);
+
+        messages.AddMessages(result.AsChatResponse());
+    }
+
+    private async Task AddUserMessageAsync(ChatMessage userMessage)
+    {
+        CancelAnyCurrentResponse();
+
+        // Add the user message to the conversation
+        messages.Add(userMessage);
+        //chatSuggestions?.Clear();
+        await chatInput!.FocusAsync();
+
+        // Stream and display a new response from the Agent AI
+        var responseText = new TextContent("");
+        currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
+        currentResponseCancellation = new();
+        await foreach (var update in dmAgent.RunStreamingAsync(userMessage, agentThread, cancellationToken: currentResponseCancellation.Token))
+        {
+            messages.AddMessages(update.AsChatResponseUpdate(), filter: c => c is not TextContent);
+            responseText.Text += update.Text;
+            ChatMessageItem.NotifyChanged(currentResponseMessage);
+        }
+
+        // Store the final response in the conversation, and begin getting suggestions
+        messages.Add(currentResponseMessage!);
+        currentResponseMessage = null;
+    }
+
+    private void CancelAnyCurrentResponse()
+    {
+        // If a response was cancelled while streaming, include it in the conversation so it's not lost
+        if (currentResponseMessage is not null)
+        {
+            messages.Add(currentResponseMessage);
+        }
+
+        currentResponseCancellation?.Cancel();
+        currentResponseMessage = null;
+    }
+
+    private async Task ResetConversationAsync()
+    {
+        CancelAnyCurrentResponse();
+        messages.Clear();
+        messages.Add(new(ChatRole.System, DM_INSTRUCTIONS));
+        await chatInput!.FocusAsync();
+    }
+
+    [Description("Searches for information using a phrase or keyword")]
+    private async Task<IEnumerable<string>> SearchDocsAsync(
+    [Description("The phrase to search for.")] string searchPhrase,
+    [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
+    {
+        await InvokeAsync(StateHasChanged);
+        var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
+        return results.Select(result =>
+            $"<result filename=\"{result.DocumentId}\" page_number=\"{result.PageNumber}\">{result.Text}</result>");
+    }
+
+    public void Dispose()
+        => currentResponseCancellation?.Cancel();
+}
