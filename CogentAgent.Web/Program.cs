@@ -1,7 +1,8 @@
-using Microsoft.Extensions.AI;
+using Azure.AI.OpenAI;
 using CogentAgent.Web.Components;
 using CogentAgent.Web.Services;
 using CogentAgent.Web.Services.Ingestion;
+using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
 
@@ -11,18 +12,37 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var token = builder.Configuration["GITHUB_TOKEN"];
+//var token = builder.Configuration["GITHUB_TOKEN"];
 
-var credential = new ApiKeyCredential(token!);
-var openAIOptions = new OpenAIClientOptions()
-{
-    Endpoint = new Uri("https://models.inference.ai.azure.com")
-};
+//var credential = new ApiKeyCredential(token!);
+//var openAIOptions = new OpenAIClientOptions()
+//{    
+//    Endpoint = new Uri("https://models.inference.ai.azure.com")
+//};
 
-var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
+//var ghModelsClient = new OpenAIClient(credential, openAIOptions);
+//var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
 
-var embeddingGenerator = ghModelsClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+//var embeddingGenerator = ghModelsClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+
+var token = builder.Configuration["AZURE_OPENAI_KEY"]!;
+var endpoint = builder.Configuration["AZURE_OPENAI_ENDPOINT"]!;
+var model = builder.Configuration["AZURE_OPENAI_DEPLOYMENT"]!;
+var embeddingModel = builder.Configuration["AZURE_OPENAI_EMBEDDING_DEPLOYMENT"]!;
+
+var openAIClient = new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(token));
+
+//var openAIClient = new OpenAIClient(
+//    new ApiKeyCredential(token), 
+//    new OpenAIClientOptions() { Endpoint = new Uri(endpoint) });
+
+var chatClient = openAIClient
+    .GetChatClient(model)
+    .AsIChatClient();
+
+var embeddingGenerator = openAIClient
+    .GetEmbeddingClient(embeddingModel)
+    .AsIEmbeddingGenerator();
 
 var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
 var vectorStoreConnectionString = $"Data Source={vectorStorePath}";

@@ -8,13 +8,38 @@
 
 <PageTitle>Game Chat</PageTitle>
 
-<ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
-    <NoMessagesContent>
-    </NoMessagesContent>
-</ChatMessageList>
+<div class="right-pane visible">
+    <div class="game-info-header">
+        @if (Game is not null)
+        {
+            <div class="game-info-header">
+                <h2>@Game.Title</h2>
+                <p class="setting">@Game.Setting</p>
 
-<div class="chat-container">
-    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+                <div class="status">
+                    <strong>Status:</strong> @Game.Status
+                </div>
+
+                @if (Game.CurrentScene is not null)
+                {
+                    <div class="scene">
+                        <strong>Scene:</strong> @Game.CurrentScene.Title<br />
+                        <span class="scene-description">@Game.CurrentScene.Description</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="scrollable-content">
+        <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
+            <NoMessagesContent />
+        </ChatMessageList>
+    </div>
+
+    <div class="chat-container">
+        <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+    </div>
 </div>
 
 @code {
@@ -28,6 +53,7 @@
 
     private AIAgent dmAgent;
     private AgentThread agentThread;
+    private CogentGame? Game;
 
     private const string DM_INSTRUCTIONS = @"
         You are Cogent, the Dungeon Master for a futuristic role-playing game set in a richly detailed world of intrigue, exploration, and tactical decision-making. Your role is to guide players through immersive scenarios, respond to their actions with creativity and consistency, and maintain the tone and rules of the game world.
@@ -63,7 +89,7 @@
     {
         // Initialize game object state and AI agent using Microsoft Agent Framework
 
-        var game = new CogentGame(this.GameCreator);
+        Game = new CogentGame(this.GameCreator);
 
         dmAgent = new ChatClientAgent(
             chatClient,
@@ -75,12 +101,12 @@
                 {
                     Tools = [
                         AIFunctionFactory.Create(SearchDocsAsync),
-                        AIFunctionFactory.Create(game.InitializeGame),
-                        AIFunctionFactory.Create(game.AddCharacter),
-                        AIFunctionFactory.Create(game.ApplySkillCheck),
-                        AIFunctionFactory.Create(game.NarrateScene),
-                        AIFunctionFactory.Create(game.RespondToAction),
-                        AIFunctionFactory.Create(game.RollDice),
+                        AIFunctionFactory.Create(Game.InitializeGame),
+                        AIFunctionFactory.Create(Game.AddCharacter),
+                        AIFunctionFactory.Create(Game.ApplySkillCheck),
+                        AIFunctionFactory.Create(Game.NarrateScene),
+                        AIFunctionFactory.Create(Game.RespondToAction),
+                        AIFunctionFactory.Create(Game.RollDice),
                     ],
                 }
             });

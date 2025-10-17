@@ -33,14 +33,43 @@
         transform: translateX(100%);
     }
 
+    /* Override for .right-pane.visible to make it lighter and more vibrant */
     .right-pane.visible {
         width: 50%;
         opacity: 1;
         pointer-events: auto;
         transform: translateX(0);
-        background-color: #1a1a2e;
-        border-left: 1px solid #2c2c3e;
+        background: linear-gradient(to bottom right, #f0f8ff, #e6f7ff);
+        border-left: 1px solid #d0e0ff;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+        color: #333;
     }
+
+        /* Optional: brighten text and links inside the right pane */
+        .right-pane.visible h1,
+        .right-pane.visible h2,
+        .right-pane.visible h3,
+        .right-pane.visible p,
+        .right-pane.visible a {
+            color: #222;
+        }
+
+        /* Optional: add subtle animation to content reveal */
+        .right-pane.visible > * {
+            animation: fadeInUp 0.4s ease;
+        }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 .toggle-pane-button {
     position: absolute;
