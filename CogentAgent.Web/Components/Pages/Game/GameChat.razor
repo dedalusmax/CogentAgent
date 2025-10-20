@@ -2,6 +2,7 @@
 @using CogentAgent.Web.Models
 @using Microsoft.Agents.AI
 @using System.ComponentModel
+@using Microsoft.Agents.AI.Workflows
 
 @inject IChatClient chatClient
 @inject SemanticSearch Search
@@ -18,6 +19,15 @@
 
                 <div class="status">
                     <strong>Status:</strong> @Game.Status
+                </div>
+
+                <div>
+                    @foreach (var player in Game.Players)
+                    {
+                        <div class="character">
+                            <strong>Character:</strong> @player.Name
+                        </div>
+                    }
                 </div>
 
                 @if (Game.CurrentScene is not null)
@@ -89,6 +99,9 @@
     {
         // Initialize game object state and AI agent using Microsoft Agent Framework
 
+        AIAgent advisorAgent = chatClient
+            .CreateAIAgent();
+
         Game = new CogentGame(this.GameCreator);
 
         dmAgent = new ChatClientAgent(
@@ -100,7 +113,8 @@
                 ChatOptions = new ChatOptions
                 {
                     Tools = [
-                        AIFunctionFactory.Create(SearchDocsAsync),
+                        //AIFunctionFactory.Create(SearchDocsAsync),
+                        advisorAgent.AsAIFunction(),
                         AIFunctionFactory.Create(Game.InitializeGame),
                         AIFunctionFactory.Create(Game.AddCharacter),
                         AIFunctionFactory.Create(Game.ApplySkillCheck),
@@ -110,6 +124,15 @@
                     ],
                 }
             });
+
+        AIAgent croatianAgent = chatClient.CreateAIAgent(
+            instructions: "You are a helpful assistant who responds in Croatian.",
+            name: "CroatianTranslator",
+            tools: [dmAgent.AsAIFunction()]
+            );
+
+        Workflow workflow = AgentWorkflowBuilder
+            .BuildSequential(dmAgent, croatianAgent);
 
         agentThread = dmAgent.GetNewThread();
 
