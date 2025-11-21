@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CogentAgent.Web", "CogentAgent.Web\CogentAgent.Web.csproj", "{67FA2488-2A50-597A-7D13-0E3FF3044E9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CogentAgent.AppHost", "CogentAgent.AppHost\CogentAgent.AppHost.csproj", "{368D9096-AC1D-45D8-AB95-70338D0362CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CogentAgent.ServiceDefaults", "CogentAgent.ServiceDefaults\CogentAgent.ServiceDefaults.csproj", "{1BFC2786-2B5E-B944-1776-A854FEF0F533}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{67FA2488-2A50-597A-7D13-0E3FF3044E9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67FA2488-2A50-597A-7D13-0E3FF3044E9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67FA2488-2A50-597A-7D13-0E3FF3044E9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{368D9096-AC1D-45D8-AB95-70338D0362CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{368D9096-AC1D-45D8-AB95-70338D0362CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{368D9096-AC1D-45D8-AB95-70338D0362CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{368D9096-AC1D-45D8-AB95-70338D0362CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BFC2786-2B5E-B944-1776-A854FEF0F533}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BFC2786-2B5E-B944-1776-A854FEF0F533}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BFC2786-2B5E-B944-1776-A854FEF0F533}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BFC2786-2B5E-B944-1776-A854FEF0F533}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

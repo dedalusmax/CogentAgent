@@ -23,4 +23,8 @@
     <Folder Include="wwwroot\assets\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CogentAgent.ServiceDefaults\CogentAgent.ServiceDefaults.csproj" />
+  </ItemGroup>
+
 </Project>
