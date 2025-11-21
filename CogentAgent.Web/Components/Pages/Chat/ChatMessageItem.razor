@@ -39,7 +39,7 @@ else if (Message.Role == ChatRole.Assistant)
                                 <svg xmlns="http://www.w3.org/2000/svg" class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v18l15-9L5 3z" />
                                 </svg>
-                                Play Game
+                                Play the game
                             </button>
                         </div>
                     }
@@ -71,7 +71,7 @@ else if (Message.Role == ChatRole.Assistant)
     private static readonly ConditionalWeakTable<ChatMessage, ChatMessageItem> SubscribersLookup = new();
 
     private static readonly Regex CitationRegex = new(@"<citation filename='(?<file>[^']*)' page_number='(?<page>\d*)'>(?<quote>.*?)</citation>", RegexOptions.NonBacktracking);
-    private static readonly Regex GameTagRegex = new(@"<game playerName='(?<player>[a-zA-Z0-9]+)'\s*></game>", RegexOptions.NonBacktracking);
+    private static readonly Regex GameTagRegex = new(@"<game></game>", RegexOptions.NonBacktracking);
 
     private List<(string File, int? Page, string Quote)>? citations;
     private Tuple<bool, string>? game;
@@ -83,7 +83,7 @@ else if (Message.Role == ChatRole.Assistant)
     public bool InProgress { get; set;}
 
     [Parameter]
-    public EventCallback<string> OnPlayGameRequested { get; set; }
+    public EventCallback OnPlayGameRequested { get; set; }
 
     private string cleanedText = string.Empty;
 
@@ -132,7 +132,7 @@ else if (Message.Role == ChatRole.Assistant)
     {
         if (game is not null && OnPlayGameRequested.HasDelegate)
         {
-            OnPlayGameRequested.InvokeAsync(game.Item2);
+            OnPlayGameRequested.InvokeAsync();
         }
     }
 }

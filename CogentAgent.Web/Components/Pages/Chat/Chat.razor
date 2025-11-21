@@ -30,9 +30,9 @@
 
     <!-- Right: Game Chat (conditionally shown) -->
     <div class="chat-pane right-pane @(showRightPane ? "visible" : "hidden")">
-        @if (!string.IsNullOrEmpty(gameCreator))
+        @if (showRightPane)
         {
-            <GameChat GameCreator="@gameCreator"></GameChat>
+            <GameChat></GameChat>
         }
     </div>
 </div>
@@ -44,11 +44,9 @@
 @code {
     private bool showRightPane = false;
     private void ToggleRightPane() => showRightPane = !showRightPane;
-    private string gameCreator = string.Empty;
 
-    private void HandlePlayGame(string playerName)
+    private void HandlePlayGame()
     {
-        gameCreator = playerName;
         ToggleRightPane();
     }
 
@@ -68,8 +66,8 @@
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
         Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.        
 
-        If the player desires to play the game, create a special tag: 
-        <game playerName='string'></game>
+        If the player desires to play the game, create a special XML-formatted tag:, that looks like this:
+        <game></game>
     ";
 
     private int statefulMessageCount;

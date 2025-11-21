@@ -2,7 +2,7 @@
 
 namespace CogentAgent.Web.Models;
 
-public class CogentGame(string creator)
+public class CogentGame()
 {
     public string Title { get; set; }
     public string Setting { get; set; }

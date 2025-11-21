@@ -53,9 +53,6 @@
 </div>
 
 @code {
-    [Parameter] 
-    public string GameCreator { get; set; } = "Pero";
-
     private readonly List<ChatMessage> messages = new();
     private ChatMessage? currentResponseMessage;
     private CancellationTokenSource? currentResponseCancellation;
@@ -102,7 +99,7 @@
         AIAgent advisorAgent = chatClient
             .CreateAIAgent();
 
-        Game = new CogentGame(this.GameCreator);
+        Game = new CogentGame();
 
         dmAgent = new ChatClientAgent(
             chatClient,

@@ -30,7 +30,7 @@
     public RenderFragment? NoMessagesContent { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnPlayGameRequested { get; set; }
+    public EventCallback OnPlayGameRequested { get; set; }
 
     private bool IsEmpty => !Messages.Any(m => (m.Role == ChatRole.User || m.Role == ChatRole.Assistant) && !string.IsNullOrEmpty(m.Text));
 
