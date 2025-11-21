@@ -50,26 +50,6 @@
         ToggleRightPane();
     }
 
-    private const string SystemPrompt = @"
-        You are an AI assistant designed to help players learning to play Cogent - a pen & paper role-playing game,
-        by providing information based on a collection of documents, and their homepage at https://cogentroleplay.com/.
-
-        Do not answer questions about anything else.
-        Use only simple markdown to format your responses.
-
-        Use the search tool to find relevant information. When you do this, end your reply with citations in the special XML format:
-
-        <citation filename='string' page_number='number'>exact quote here</citation>
-
-        Always include the citation in your response if there are results. 
-
-        The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-        Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.        
-
-        If the player desires to play the game, create a special XML-formatted tag:, that looks like this:
-        <game></game>
-    ";
-
     private int statefulMessageCount;
     private readonly ChatOptions chatOptions = new();
     private readonly List<ChatMessage> messages = new();
@@ -81,7 +61,7 @@
     protected override void OnInitialized()
     {
         statefulMessageCount = 0;
-        messages.Add(new(ChatRole.System, SystemPrompt));
+        messages.Add(new(ChatRole.System, Prompts.ADVISOR_INSTRUCTIONS));
         messages.Add(new(ChatRole.Assistant, "Ask me some question, whether it's about game, mechanics or wonderful world of fantasy."));
         chatOptions.Tools = [AIFunctionFactory.Create(SearchAsync)];
     }
@@ -130,7 +110,7 @@
     {
         CancelAnyCurrentResponse();
         messages.Clear();
-        messages.Add(new(ChatRole.System, SystemPrompt));
+        messages.Add(new(ChatRole.System, Prompts.ADVISOR_INSTRUCTIONS));
         chatOptions.ConversationId = null;
         statefulMessageCount = 0;
         chatSuggestions?.Clear();

@@ -1,7 +1,12 @@
 using Azure.AI.OpenAI;
 using CogentAgent.Web.Components;
+using CogentAgent.Web.Models;
 using CogentAgent.Web.Services;
 using CogentAgent.Web.Services.Ingestion;
+using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.DevUI;
+using Microsoft.Agents.AI.Hosting;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using System.ClientModel;
 
@@ -33,8 +38,61 @@ builder.Services.AddSqliteCollection<string, IngestedDocument>("data-cogentagent
 
 builder.Services.AddScoped<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();
-builder.Services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
+
+builder.Services.AddChatClient(chatClient)
+    .UseFunctionInvocation()
+    .UseLogging();
+
 builder.Services.AddEmbeddingGenerator(embeddingGenerator);
+
+builder.Services.AddSingleton<CogentGame>();
+
+builder.AddAIAgent("LoreMaster", (sp, key) => 
+{
+    var chatClient = sp.GetRequiredService<IChatClient>();
+    var aiAgent = chatClient.CreateAIAgent(name: key, instructions: Prompts.ADVISOR_INSTRUCTIONS);
+    return aiAgent;
+});
+
+builder.AddAIAgent("DungeonMaster", (sp, key) => 
+{
+    var chatClient = sp.GetRequiredService<IChatClient>();
+    var game = sp.GetRequiredService<CogentGame>();
+    var loreMasterAgent = sp.GetRequiredKeyedService<AIAgent>("LoreMaster");
+
+    var aiAgent = new ChatClientAgent(
+            chatClient,
+            new ChatClientAgentOptions
+            {
+                Name = key,
+                Instructions = Prompts.DM_INSTRUCTIONS,
+                ChatOptions = new ChatOptions
+                {
+                    Tools = [
+                        loreMasterAgent.AsAIFunction(),
+                        AIFunctionFactory.Create(game.InitializeGame),
+                        AIFunctionFactory.Create(game.AddCharacter),
+                        AIFunctionFactory.Create(game.ApplySkillCheck),
+                        AIFunctionFactory.Create(game.NarrateScene),
+                        AIFunctionFactory.Create(game.RespondToAction),
+                        AIFunctionFactory.Create(game.RollDice),
+                    ],
+                }
+            });
+
+    return aiAgent;
+});
+
+var workflow = builder.AddWorkflow("my-workflow", (sp, key) =>
+{
+    var loreMaster = sp.GetRequiredKeyedService<AIAgent>("LoreMaster");
+    var dungeonMaster = sp.GetRequiredKeyedService<AIAgent>("DungeonMaster");
+    return AgentWorkflowBuilder.BuildSequential(key, [loreMaster, dungeonMaster]);
+})
+.AddAsAIAgent();
+
+builder.Services.AddOpenAIResponses();
+builder.Services.AddOpenAIConversations();
 
 var app = builder.Build();
 
@@ -60,5 +118,13 @@ app.MapRazorComponents<App>()
 await DataIngestor.IngestDataAsync(
     app.Services,
     new PDFDirectorySource(Path.Combine(builder.Environment.WebRootPath, "Data")));
+
+app.MapOpenAIResponses();
+app.MapOpenAIConversations();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapDevUI();
+}
 
 app.Run();
