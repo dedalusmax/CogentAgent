@@ -1,23 +1,49 @@
-# AI Chat with Custom Data
+﻿# CogentAgent
 
-This project is an AI chat application that demonstrates how to chat with custom data using an AI language model. Please note that this template is currently in an early preview stage. If you have feedback, please take a [brief survey](https://aka.ms/dotnet-chat-templatePreview2-survey).
+CogentAgent is an experimental framework for building **cogent, multi‑modal agents** that combine web, cloud, and AI capabilities into a unified solution. It is designed to help developers orchestrate distributed services, integrate diagnostics, and expose actionable insights through modern web interfaces.
 
->[!NOTE]
-> Before running this project you need to configure the API keys or endpoints for the providers you have chosen. See below for details specific to your choices.
+---
 
-# Configure the AI Model Provider
-To use models hosted by GitHub Models, you will need to create a GitHub personal access token with `models:read` permissions, but no other scopes or permissions. See [Prototyping with AI models](https://docs.github.com/github-models/prototyping-with-ai-models) and [Managing your personal access tokens](https://docs.github.com/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) in the GitHub Docs for more information.
+## ✨ Features
 
-Configure your token for this project using .NET User Secrets:
+- **Multi‑language support**: Built with **JavaScript, HTML, CSS, and C#**, allowing polyglot development across front‑end and back‑end.
+- **Web interface**: The `CogentAgent.Web` project provides a clean entry point for user interaction.
+- **Extensible architecture**: Structured as a Visual Studio solution (`CogentAgent.sln`) for modular growth.
+- **Cloud‑ready design**: Intended for deployment to Azure services, with emphasis on observability and maintainability.
+- **Agent‑style workflows**: Encapsulates logic for autonomous or semi‑autonomous tasks, making it suitable for experimentation with AI‑driven agents.
 
-1. In Visual Studio, right-click on your project in the Solution Explorer and select "Manage User Secrets".
-2. This opens a `secrets.json` file where you can store your API keys without them being tracked in source control. Add the following key and value:
+---
 
-   ```json
-   {
-     "GitHubModels:Token": "YOUR-TOKEN"
-   }
-   ```
+## 📂 Project Structure
 
-Learn more about [prototyping with AI models using GitHub Models](https://docs.github.com/github-models/prototyping-with-ai-models).
+- **CogentAgent.Web/** → Web front‑end and API layer  
+- **CogentAgent.sln** → Solution file for Visual Studio / .NET tooling  
+- **README.md** → Project documentation (this file)  
+- **.gitignore / .gitattributes** → Git configuration files  
 
+**Languages used:**
+- JavaScript (58%)  
+- HTML (20%)  
+- C# (11%)  
+- CSS (10%)  
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [.NET 10 SDK](https://dotnet.microsoft.com/) or later  
+- Node.js (for front‑end assets)  
+- Visual Studio Code or Visual Studio  
+
+### Build & Run
+```bash
+# Clone the repository
+git clone https://github.com/dedalusmax/CogentAgent.git
+cd CogentAgent
+
+# Build the solution
+dotnet build CogentAgent.sln
+
+# Run the web project
+dotnet run --project CogentAgent.Web
